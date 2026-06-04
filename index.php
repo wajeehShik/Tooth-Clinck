@@ -1,85 +1,71 @@
-<?php include('include/header.php');?>
+<?php include('include/header.php');
+
+
+$stmt = $pdo->prepare("SELECT * FROM services WHERE status = 1 order by id  desc limit 6");
+$stmt->execute();
+$services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->prepare("SELECT question, answer FROM faqs LIMIT 6");
+$stmt->execute();
+$faqs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!-- HERO -->
-<section class="relative pt-36 pb-24 overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.12),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.08),transparent_35%)]">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-14 items-center">
-            <!-- CONTENT -->
-            <div>
-                <span class="bg-white/70 backdrop-blur-md border border-white/40 px-5 py-3 rounded-full text-sky-700 font-bold inline-flex mb-8 shadow-sm">
-                    🔥 مواعيد متاحة اليوم - تأكيد فوري
-                </span>
-                <h1 class="text-5xl lg:text-7xl font-black leading-tight text-slate-900 mb-8">
-                    احجز موعد <span class="text-sky-500">أسنانك خلال دقيقة</span>
+<section class="relative min-h-[80vh] flex items-center pt-24 pb-20 overflow-hidden bg-slate-50">
+    <!-- تأثيرات خلفية ضوئية -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-sky-200/50 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-indigo-200/50 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+        <div class="grid lg:grid-cols-12 gap-12 items-center">
+            
+            <!-- الجانب النصي -->
+            <div class="lg:col-span-7 space-y-8">
+                <div class="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-sky-100 shadow-sm">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+                    </span>
+                    <span class="text-sm font-semibold text-sky-700">نستقبل الحالات اليوم</span>
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 leading-[1.1]">
+                    ابتسامة أحلامك <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-600">تبدأ من هنا</span>
                 </h1>
-                <p class="text-slate-600 text-xl leading-loose mb-10 max-w-2xl">
-                    عيادة متخصصة بأحدث تقنيات طب الأسنان مع فريق طبي محترف وتجربة حجز سهلة وسريعة بدون انتظار.
+                
+                <p class="text-lg md:text-xl text-slate-600 max-w-lg leading-relaxed">
+                    نجمع بين الدقة الطبية والراحة القصوى. انضم لأكثر من 10,000 مريض استعادوا ثقتهم بابتسامتهم معنا.
                 </p>
 
-                <!-- FEATURES -->
-                <div class="flex flex-wrap gap-4 mb-10">
-                    <div class="bg-white/70 backdrop-blur-md border border-white/40 px-5 py-4 rounded-2xl font-bold text-slate-700 shadow-sm">
-                        ✔ +10,000 مريض
-                    </div>
-                    <div class="bg-white/70 backdrop-blur-md border border-white/40 px-5 py-4 rounded-2xl font-bold text-slate-700 shadow-sm">
-                        ✔ تأكيد فوري للحجز
-                    </div>
-                    <div class="bg-white/70 backdrop-blur-md border border-white/40 px-5 py-4 rounded-2xl font-bold text-slate-700 shadow-sm">
-                        ✔ أحدث الأجهزة الطبية
-                    </div>
-                </div>
-
-                <!-- STATS -->
-                <div class="grid grid-cols-3 gap-5">
-                    <div class="bg-white/70 backdrop-blur-md border border-white/40 rounded-3xl p-5 text-center shadow-sm">
-                        <h2 class="text-3xl font-black text-slate-900">98%</h2>
-                        <p class="text-slate-500 mt-2">رضا المرضى</p>
-                    </div>
-                    <div class="bg-white/70 backdrop-blur-md border border-white/40 rounded-3xl p-5 text-center shadow-sm">
-                        <h2 class="text-3xl font-black text-slate-900">+15</h2>
-                        <p class="text-slate-500 mt-2">سنة خبرة</p>
-                    </div>
-                    <div class="bg-white/70 backdrop-blur-md border border-white/40 rounded-3xl p-5 text-center shadow-sm">
-                        <h2 class="text-3xl font-black text-slate-900">اليوم</h2>
-                        <p class="text-slate-500 mt-2">مواعيد متاحة</p>
-                    </div>
+                <div class="flex flex-wrap gap-4 pt-4">
+                    <button class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-sky-600 transition-all duration-300 shadow-lg shadow-sky-200">
+                        احجز استشارتك الآن
+                    </button>
+                    <button class="px-8 py-4 bg-white text-slate-700 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all">
+                        استعرض خدماتنا
+                    </button>
                 </div>
             </div>
 
-            <!-- BOOKING CARD -->
-            <div class="relative" id="booking">
-                <div class="absolute -top-10 -left-10 w-72 h-72 bg-sky-300/30 rounded-full blur-3xl"></div>
-                <div class="relative z-10 bg-white rounded-[40px] p-8 lg:p-10 shadow-2xl border border-slate-100">
-                    <div class="mb-8 text-center">
-                        <h2 class="text-4xl font-black text-slate-900 mb-4">احجز موعدك الآن</h2>
-                        <p class="text-slate-500 text-lg">الحجز يستغرق أقل من دقيقة</p>
-                    </div>
-
-                    <div class="space-y-5">
-                        <input type="text" placeholder="الاسم الكامل" class="w-full h-16 rounded-2xl border border-slate-200 px-6 outline-none focus:border-sky-400 transition">
-                        <input type="text" placeholder="رقم الهاتف" class="w-full h-16 rounded-2xl border border-slate-200 px-6 outline-none focus:border-sky-400 transition">
-                        <select class="w-full h-16 rounded-2xl border border-slate-200 px-6 outline-none focus:border-sky-400 transition bg-white">
-                            <option>اختر الخدمة</option>
-                            <option>تنظيف الأسنان</option>
-                            <option>حشو الأسنان</option>
-                            <option>تبييض الأسنان</option>
-                            <option>تقويم الأسنان</option>
-                        </select>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="date" class="w-full h-16 rounded-2xl border border-slate-200 px-6 outline-none focus:border-sky-400 transition">
-                            <input type="time" class="w-full h-16 rounded-2xl border border-slate-200 px-6 outline-none focus:border-sky-400 transition">
+            <!-- الجانب البصري (كارت العرض) -->
+            <div class="lg:col-span-5 relative">
+                <div class="relative bg-white p-4 rounded-[3rem] shadow-2xl border border-white/50 rotate-2 hover:rotate-0 transition-transform duration-500">
+                    <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800" 
+                         alt="عيادة أسنان" 
+                         class="rounded-[2.5rem] w-full h-[400px] object-cover">
+                    
+                    <!-- إحصائية عائمة -->
+                    <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-3xl shadow-xl border border-slate-100">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-sky-100 p-3 rounded-2xl text-sky-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-2xl font-black text-slate-900">98%</h4>
+                                <p class="text-sm text-slate-500">تقييم ممتاز</p>
+                            </div>
                         </div>
-
-                        <button class="w-full h-16 rounded-2xl bg-gradient-to-l from-sky-500 to-sky-600 text-white font-black text-xl shadow-xl shadow-sky-200 hover:scale-[1.02] transition transform duration-300">
-                            احجز الآن
-                        </button>
-                    </div>
-
-                    <!-- TRUST -->
-                    <div class="flex items-center justify-center gap-6 mt-8 text-slate-500 font-bold text-sm flex-wrap">
-                        <span>✔ تأكيد سريع</span>
-                        <span>✔ بياناتك آمنة</span>
-                        <span>✔ بدون انتظار</span>
                     </div>
                 </div>
             </div>
@@ -87,52 +73,55 @@
         </div>
     </div>
 </section>
-
-<!-- SERVICES -->
-<section class="py-28 bg-white" id="services">
+<section class="py-24 bg-slate-50">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
-        <div class="text-center mb-20">
-            <span class="text-sky-500 font-black text-lg">خدماتنا</span>
-            <h2 class="text-[42px] font-900 text-slate-900 leading-[1.3] mt-5">خدمات متكاملة لصحة أسنانك</h2>
+        <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-black text-slate-900 mb-4">خدماتنا المتميزة</h2>
+            <p class="text-slate-500 text-lg">اختر الخدمة المناسبة واحجز موعدك بكل سهولة</p>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- CARD 1 -->
-            <div class="bg-white border border-slate-200 rounded-[32px] p-8 transition duration-400 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-                <div class="w-20 h-20 rounded-[28px] bg-sky-100 flex items-center justify-center text-4xl mb-8">🪥</div>
-                <h3 class="text-3xl font-black text-slate-900 mb-5">تنظيف الأسنان</h3>
-                <p class="text-slate-600 leading-loose mb-8">تنظيف احترافي للحفاظ على صحة الأسنان واللثة.</p>
-                <div class="flex items-center justify-between">
-                    <span class="font-black text-sky-500 text-xl">30$</span>
-                    <span class="text-slate-500">30 دقيقة</span>
+       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+    <?php foreach ($services as $service): ?>
+        
+        <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-sky-100 transition-all duration-500 flex flex-col justify-between">
+            
+            <div>
+                <div class="w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center mb-6 text-sky-500 text-3xl">
+                    🦷
                 </div>
+
+                <h3 class="text-2xl font-bold text-slate-900 mb-3">
+                    <?= htmlspecialchars($service['name']) ?>
+                </h3>
+
+                <p class="text-slate-500 mb-6 leading-relaxed">
+                    <?= htmlspecialchars($service['description']) ?>
+                </p>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <span class="text-2xl font-black text-slate-900">
+                        <?= $service['price'] ?> شيكل
+                    </span>
+
+                    <span class="text-sm font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full">
+                        <?= $service['sessions_count'] ?> جلسة
+                    </span>
+                </div>
+
+                <button class="w-full py-4 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-2xl transition duration-300 transform hover:scale-[1.02]">
+                    احجز هذه الخدمة
+                </button>
             </div>
 
-            <!-- CARD 2 -->
-            <div class="bg-white border border-slate-200 rounded-[32px] p-8 transition duration-400 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-                <div class="w-20 h-20 rounded-[28px] bg-cyan-100 flex items-center justify-center text-4xl mb-8">🦷</div>
-                <h3 class="text-3xl font-black text-slate-900 mb-5">حشو الأسنان</h3>
-                <p class="text-slate-600 leading-loose mb-8">علاج التسوس باستخدام أحدث تقنيات الحشو.</p>
-                <div class="flex items-center justify-between">
-                    <span class="font-black text-sky-500 text-xl">50$</span>
-                    <span class="text-slate-500">45 دقيقة</span>
-                </div>
-            </div>
-
-            <!-- CARD 3 -->
-            <div class="bg-white border border-slate-200 rounded-[32px] p-8 transition duration-400 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-                <div class="w-20 h-20 rounded-[28px] bg-emerald-100 flex items-center justify-center text-4xl mb-8">😁</div>
-                <h3 class="text-3xl font-black text-slate-900 mb-5">تبييض الأسنان</h3>
-                <p class="text-slate-600 leading-loose mb-8">ابتسامة أكثر إشراقاً باستخدام تقنيات حديثة وآمنة.</p>
-                <div class="flex items-center justify-between">
-                    <span class="font-black text-sky-500 text-xl">80$</span>
-                    <span class="text-slate-500">ساعة</span>
-                </div>
-            </div>
         </div>
+
+    <?php endforeach; ?>
+
+</div>
     </div>
 </section>
-
 <!-- ABOUT -->
 <section class="py-28" id="about">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
@@ -161,37 +150,61 @@
         </div>
     </div>
 </section>
+<!-- TESTIMONIALS SECTION -->
+<section class="py-28 bg-slate-50 relative overflow-hidden" id="reviews">
+    <!-- تأثيرات خلفية -->
+    <div class="absolute top-1/2 left-0 w-96 h-96 bg-sky-200/20 rounded-full blur-[100px]"></div>
 
-<!-- TESTIMONIALS -->
-<section class="py-28 bg-white" id="reviews">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         <div class="text-center mb-20">
-            <span class="text-sky-500 font-black text-lg">آراء المرضى</span>
-            <h2 class="text-[42px] font-900 text-slate-900 leading-[1.3] mt-5">ماذا يقول مرضانا؟</h2>
+            <span class="text-sky-600 font-bold tracking-wider uppercase text-sm">آراء المرضى</span>
+            <h2 class="text-4xl lg:text-6xl font-black text-slate-900 mt-4">قصص نجاح الابتسامة</h2>
         </div>
 
-        <div class="grid lg:grid-cols-3 gap-8">
-            <div class="bg-white border border-slate-200 rounded-[32px] p-8 transition duration-400 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-                <div class="flex text-yellow-400 text-2xl mb-6">⭐⭐⭐⭐⭐</div>
-                <p class="text-slate-600 leading-loose mb-8">تجربة رائعة جداً، فريق محترف وتعامل ممتاز.</p>
-                <h3 class="font-black text-slate-900">أحمد محمد</h3>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <!-- بطاقة المريض 1 -->
+            <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/20 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl">
+                <div class="flex text-yellow-400 mb-6 gap-0.5">★★★★★</div>
+                <p class="text-slate-600 leading-relaxed mb-8 italic">"تجربة تفوق التوقعات! الفريق محترف جداً والتعامل راقٍ، شعرت بالراحة من اللحظة الأولى."</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center font-bold text-sky-700 text-lg">أ</div>
+                    <div>
+                        <h3 class="font-black text-slate-900">أحمد محمد</h3>
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">مريض دائم</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-[32px] p-8 transition duration-400 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-                <div class="flex text-yellow-400 text-2xl mb-6">⭐⭐⭐⭐⭐</div>
-                <p class="text-slate-600 leading-loose mb-8">أفضل عيادة أسنان من حيث النظافة والاهتمام بالمريض.</p>
-                <h3 class="font-black text-slate-900">سارة خالد</h3>
+            <!-- بطاقة المريض 2 -->
+            <div class="bg-white p-8 rounded-[2.5rem] border border-sky-100 shadow-xl shadow-sky-100/50 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl">
+                <div class="flex text-yellow-400 mb-6 gap-0.5">★★★★★</div>
+                <p class="text-slate-600 leading-relaxed mb-8 italic">"أفضل عيادة أسنان تعاملت معها، مستوى النظافة والاهتمام بأدق التفاصيل شيء يبعث على الطمأنينة."</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center font-bold text-indigo-700 text-lg">س</div>
+                    <div>
+                        <h3 class="font-black text-slate-900">سارة خالد</h3>
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">تجميل أسنان</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-[32px] p-8 transition duration-400 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-                <div class="flex text-yellow-400 text-2xl mb-6">⭐⭐⭐⭐⭐</div>
-                <p class="text-slate-600 leading-loose mb-8">الخدمة ممتازة والنتائج رائعة، أنصح الجميع بها.</p>
-                <h3 class="font-black text-slate-900">محمد يوسف</h3>
+            <!-- بطاقة المريض 3 -->
+            <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/20 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl">
+                <div class="flex text-yellow-400 mb-6 gap-0.5">★★★★★</div>
+                <p class="text-slate-600 leading-relaxed mb-8 italic">"الخدمة كانت سريعة جداً والنتائج مذهلة، لم أشعر بأي ألم. أنصح الجميع بزيارتهم."</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center font-bold text-teal-700 text-lg">م</div>
+                    <div>
+                        <h3 class="font-black text-slate-900">محمد يوسف</h3>
+                        <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">تقويم أسنان</span>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 </section>
-
 <!-- FAQ -->
 <section class="py-28 bg-slate-50" id="faq">
     <div class="max-w-4xl mx-auto px-6 lg:px-8">
@@ -201,36 +214,20 @@
         </div>
 
         <div class="space-y-6">
+            <?php foreach ($faqs as $faq): ?>
             <div class="p-6 bg-white border border-slate-200 rounded-[24px] hover:border-sky-300 transition duration-300 shadow-sm">
                 <h3 class="text-xl font-black text-slate-900 mb-3 flex items-center gap-3">
-                    <span class="text-sky-500 text-2xl">🤔</span>كيف يمكنني تعديل أو إلغاء موعد الحجز الخاص بي؟
+            
+                    <?php echo htmlspecialchars($faq['question']); ?>
                 </h3>
                 <p class="text-slate-600 leading-loose pr-9">
-                    يمكنك تعديل الموعد أو إلغاؤه بسهولة من خلال التواصل معنا مباشرة عبر رقم الهاتف أو من خلال رسائل الواتساب قبل موعدك بـ 24 ساعة على الأقل.
+                    <?php echo htmlspecialchars($faq['answer']); ?>
                 </p>
             </div>
-
-            <div class="p-6 bg-white border border-slate-200 rounded-[24px] hover:border-sky-300 transition duration-300 shadow-sm">
-                <h3 class="text-xl font-black text-slate-900 mb-3 flex items-center gap-3">
-                    <span class="text-sky-500 text-2xl">⏳</span>كم من الوقت تستغرق جلسة تبييض الأسنان?
-                </h3>
-                <p class="text-slate-600 leading-loose pr-9">
-                    استغرق الجلسة الاحترافية لتبييض الأسنان في العيادة ما بين 45 إلى 60 دقيقة تقريباً، وتظهر النتائج المذهلة بشكل فوري بعد انتهاء الجلسة.
-                </p>
-            </div>
-
-            <div class="p-6 bg-white border border-slate-200 rounded-[24px] hover:border-sky-300 transition duration-300 shadow-sm">
-                <h3 class="text-xl font-black text-slate-900 mb-3 flex items-center gap-3">
-                    <span class="text-sky-500 text-2xl">💳</span>هل تقبل العيادة بطاقات التأمين الصحي؟
-                </h3>
-                <p class="text-slate-600 leading-loose pr-9">
-                    نعم، نحن نتعاقد مع مجموعة واسعة من شركات التأمين الصحي المحلية والدولية. يمكنك مراجعتنا لتأكيد تغطية شركتك قبل البدء بالعلاج.
-                </p>
-            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
-
 <!-- FOOTER -->
 <footer class="bg-slate-900 py-14" id="contact">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">

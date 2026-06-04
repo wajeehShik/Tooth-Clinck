@@ -1,8 +1,5 @@
 <?php
-include("include/header.php"); 
-if (!isset($conn) && isset($pdo)) {
-    $conn = $pdo;
-}
+include("../include/header.php"); 
 $current_user_id = $_SESSION['id']; 
 if (isset($_GET['get_slots']) && isset($_GET['day'])) {
     if (ob_get_length()) ob_clean();
@@ -11,7 +8,7 @@ if (isset($_GET['get_slots']) && isset($_GET['day'])) {
 
     try {
         $query = "SELECT id, time_range FROM clinic_slots WHERE booking_day = ? AND is_booked = 0";
-        $stmt = $conn->prepare($query);
+        $stmt = $pdo->prepare($query);
         $stmt->execute([$selected_day]);
         $slots = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -21,10 +18,8 @@ if (isset($_GET['get_slots']) && isset($_GET['day'])) {
     }
     exit; 
 }
-
 $success_msg = "";
 $error_msg = "";
-// 3. معالجة نموذج الحجز
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
     $slot_id = $_POST['slot_id']; 
     $service_id = $_POST['specialty']; 
@@ -32,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
     if (!empty($slot_id) && !empty($service_id)) {
         try {
             $update_query = "UPDATE clinic_slots SET is_booked = 1, user_id = ?, service_id = ? WHERE id = ?";
-            $stmt = $conn->prepare($update_query);
+            $stmt = $pdo->prepare($update_query);
             if ($stmt->execute([$current_user_id, $service_id, $slot_id])) {
                 $success_msg = "تم تسجيل وتأكيد موعدك بنجاح! 🎉";
             } else {
@@ -45,57 +40,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
         $error_msg = "يرجى ملء جميع الحقول واختيار الوقت المتاح.";
     }
 }
-// 4. استعلام ديناميكي لجلب الموعد القادم مع اسم الخدمة مباشرة باستخدام JOIN
 $upcoming_appointment = null;
 try {
-    // افترضنا هنا أن اسم جدول الخدمات هو services واسم حقل الاسم هو name
-    $query = "SELECT cs.booking_day, cs.booking_date, cs.time_range, s.name as service_name 
-              FROM clinic_slots cs 
-              LEFT JOIN services s ON cs.service_id = s.id 
-              WHERE cs.user_id = ? AND cs.is_booked = 1 
-              LIMIT 1";
-    $stmt = $conn->prepare($query);
+$query = "SELECT cs.*, s.name as service_name 
+FROM clinic_slots cs 
+LEFT JOIN services s ON cs.service_id = s.id 
+WHERE cs.user_id = ? 
+  AND cs.is_booked = 1 
+ORDER BY cs.booking_date ASC, cs.time_range ASC
+LIMIT 5";
+    $stmt = $pdo->prepare($query);
     $stmt->execute([$current_user_id]);
-    $upcoming_appointment = $stmt->fetch(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    // خطأ صامت
-}
+    $upcoming_appointment = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 5. جلب الخدمات لعرضها في القائمة المنسدلة (تم تصحيح الاستعلام والجدول الافتراضي services)
+
+$countStmt = $pdo->prepare("SELECT COUNT(*) FROM clinic_slots 
+                            WHERE user_id = ? 
+                            AND is_booked = 1 
+                            AND booking_date >= CURDATE()");
+$countStmt->execute([$current_user_id]);
+$total_upcoming = $countStmt->fetchColumn();
+
+
+
+$paymentStmt = $pdo->prepare("SELECT SUM(price) as total_paid 
+                              FROM payments 
+                              WHERE user_id = ?");
+$paymentStmt->execute([$current_user_id]);
+$paymentResult = $paymentStmt->fetch(PDO::FETCH_ASSOC);
+
+$total_paid = $paymentResult['total_paid'] ?? 0;
+
+
+$payments_stmt = $pdo->prepare("
+    SELECT p.*, s.name as service_name 
+    FROM payments p
+    LEFT JOIN clinic_slots cs ON p.date_id = cs.id
+    LEFT JOIN services s ON cs.service_id = s.id
+    WHERE p.user_id = ?
+    ORDER BY p.created_at DESC limit 3
+");
+$payments_stmt->execute([$current_user_id]);
+$payments = $payments_stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+}
 try {
-    $sers = $conn->prepare('SELECT id, name FROM services WHERE status = 1');
+    $sers = $pdo->prepare('SELECT id, name FROM services WHERE status = 1');
     $sers->execute();
     $services = $sers->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $services = [];
 }
 ?>
-
-<!-- تم حذف تضمين الـ header المكرر من هنا لسلامة الكود -->
-
 <main class="min-h-screen bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.05),transparent_35%)] pt-32 pb-24 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+  
+<div class="max-w-7xl mx-auto px-6 lg:px-8">
         
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 bg-white/70 backdrop-blur-md border border-slate-200/60 p-8 rounded-[32px] shadow-sm">
             <div>
                 <h1 class="text-3xl font-black text-slate-900 mb-2">مرحباً بك، أحمد محمد 👋</h1>
                 <p class="text-slate-500 text-lg">تابع مواعيدك الطبية، مدفوعاتك، وقم بجدولة استشارات جديدة بكل سهولة.</p>
+       <a href="edit_profile.php" class="bg-slate-800 mt-5 flex text-white px-6 py-2 rounded-xl font-bold hover:bg-slate-900 transition">
+    تعديل الحساب
+</a>
             </div>
             
             <div class="flex gap-4">
                 <div class="bg-sky-50 border border-sky-100 rounded-2xl px-6 py-4 text-center min-w-[120px]">
-                    <span class="block text-2xl font-black text-sky-600"><?php echo $upcoming_appointment ? '1' : '0'; ?></span>
+                    <span class="block text-2xl font-black text-sky-600"><?php echo $total_upcoming ?></span>
                     <span class="text-slate-500 text-sm font-bold">مواعيد قادمة</span>
                 </div>
                 <div class="bg-emerald-50 border border-emerald-100 rounded-2xl px-6 py-4 text-center min-w-[120px]">
-                    <span class="block text-2xl font-black text-emerald-600">$350</span>
+                    <span class="block text-2xl font-black text-emerald-600"><?php echo $total_paid?></span>
                     <span class="text-slate-500 text-sm font-bold">إجمالي المدفوعات</span>
                 </div>
             </div>
         </div>
-
         <div class="grid lg:grid-cols-3 gap-8 items-start">
-            
             <div class="lg:col-span-2 space-y-8">
                 
                 <?php if(!empty($success_msg)): ?>
@@ -109,52 +130,52 @@ try {
                         <?php echo $error_msg; ?>
                     </div>
                 <?php endif; ?>
-
                 <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-2xl font-black text-slate-900 flex items-center gap-3">
                             <span class="text-sky-500">📅</span> المواعيد القادمة
                         </h2>
                         <span class="text-sm bg-sky-100 text-sky-700 font-bold px-3 py-1 rounded-full">مؤكدة</span>
-                    </div>
+                    </div><div class="space-y-4">
 
-                    <div class="space-y-4">
-                        <?php if ($upcoming_appointment): ?>
-                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border border-slate-100 rounded-2xl hover:border-sky-200 transition bg-slate-50/50 gap-4">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-14 h-14 bg-sky-100 rounded-2xl flex items-center justify-center text-2xl">🦷</div>
-                                    <div>
-                                        <h3 class="font-black text-slate-900 text-lg">
-                                            <?php 
-                                                // عرض اسم الخدمة القادم ديناميكياً من قاعدة البيانات مباشرة
-                                                echo htmlspecialchars($upcoming_appointment['service_name'] ?? 'استشارة طبية'); 
-                                            ?>
-                                        </h3>
-                                        <p class="text-slate-500 text-sm mt-1">حجز مؤكد مخصص لك بالعيادة</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                                    <div class="text-left sm:text-right">
-                                        <span class="block font-black text-slate-800">
-                                            <?php echo htmlspecialchars($upcoming_appointment['booking_day'] . ' / ' . $upcoming_appointment['booking_date']); ?>
-                                        </span>
-                                        <span class="text-slate-500 text-sm">
-                                            الساعة: <?php echo htmlspecialchars($upcoming_appointment['time_range']); ?>
-                                        </span>
-                                    </div>
-                                    <a href="payment.php" class="text-red-500 hover:text-red-700 font-bold text-sm bg-green-50 hover:bg-red-100 px-4 py-2 rounded-xl transition">
-                                        دفع
-                                    </a>      <a class="text-red-500 hover:text-red-700 font-bold text-sm bg-red-50 hover:bg-red-100 px-4 py-2 rounded-xl transition">
-                                        إلغاء
-                                    </a>
-                                </div>
-                            </div>
-                        <?php else: ?>
-                            <div class="text-center py-6 text-slate-400 font-bold">
-                                لا توجد لديك أي مواعيد قادمة حالياً.
-                            </div>
-                        <?php endif; ?>
+        <?php foreach ($upcoming_appointment as $appointment): ?>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 border border-slate-100 rounded-2xl hover:border-sky-200 transition bg-slate-50/50 gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-sky-100 rounded-2xl flex items-center justify-center text-2xl">🦷</div>
+                    <div>
+                        <h3 class="font-black text-slate-900 text-lg">
+                            <?php echo htmlspecialchars($appointment['service_name'] ?? 'استشارة طبية'); ?>
+                        </h3>
+                        <p class="text-slate-500 text-sm mt-1">حجز مؤكد مخصص لك بالعيادة</p>
                     </div>
+                </div>
+                <div class="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
+                    <div class="text-left sm:text-right">
+                        <span class="block font-black text-slate-800">
+                            <?php echo htmlspecialchars($appointment['booking_day'] . ' / ' . $appointment['booking_date']); ?>
+                        </span>
+                        <span class="text-slate-500 text-sm">
+                            الساعة: <?php echo htmlspecialchars($appointment['time_range']); ?>
+                        </span>
+                    </div>
+                    <?php 
+                    
+                    if($appointment['status']=='0'){?>
+                    <a href="payment.php?id=<?php echo $appointment['id']?>" class="text-red-500 hover:text-red-700 font-bold text-sm bg-green-50 hover:bg-red-100 px-4 py-2 rounded-xl transition">دفع</a>
+                    <a class="text-red-500 hover:text-red-700 font-bold text-sm bg-red-50 hover:bg-red-100 px-4 py-2 rounded-xl transition">إلغاء</a>
+                   
+                   
+                   <?php }else if($appointment['status']=='1'){?>
+
+                    <a href="ratting.php?id=<?php echo $appointment['id']?>" class="text-red-500 hover:text-red-700 font-bold text-sm bg-green-50 hover:bg-red-100 px-4 py-2 rounded-xl transition">تقييم الجلسة</a>
+
+                   <?php }else{?>
+انتهت الجلسة
+                   <?php }?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+</div>
                 </div>
 
                 <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
@@ -170,18 +191,25 @@ try {
                                     <th class="pb-4 font-black">الخدمة / العيادة</th>
                                     <th class="pb-4 font-black">التاريخ</th>
                                     <th class="pb-4 font-black">المبلغ</th>
-                                    <th class="pb-4 font-black text-left">حالة الدفع</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-50 text-slate-600 font-bold">
-                                <tr>
-                                    <td class="py-4 text-slate-900">#INV-9021</td>
-                                    <td class="py-4">كشفية عيادة الأسنان</td>
-                                    <td class="py-4 text-slate-400 text-sm">25 مايو 2026</td>
-                                    <td class="py-4 text-slate-900 font-black">$60</td>
-                                    <td class="py-4 text-left"><span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">مدفوع</span></td>
-                                </tr>
-                            </tbody>
+                         <tbody class="divide-y divide-slate-50 text-slate-600 font-bold">
+    <?php if (count($payments) > 0): ?>
+        <?php foreach ($payments as $payment): ?>
+            <tr>
+                <td class="py-4 text-slate-900">#INV-<?php echo $payment['id']; ?></td>
+                <td class="py-4"><?php echo $payment['service_name'] ?? 'خدمة عامة'; ?></td>
+                <td class="py-4 text-slate-400 text-sm"><?php echo date('d M Y', strtotime($payment['created_at'])); ?></td>
+                <td class="py-4 text-slate-900 font-black">$<?php echo $payment['price']; ?></td>
+             
+            </tr>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <tr>
+            <td colspan="5" class="py-4 text-center text-slate-400">لا توجد دفعات مالية مسجلة حالياً</td>
+        </tr>
+    <?php endif; ?>
+</tbody>
                         </table>
                     </div>
                 </div>
@@ -293,4 +321,4 @@ document.getElementById('booking_day').addEventListener('change', function() {
 });
 </script>
 
-<?php include("include/footer.php")?>
+<?php include("../include/footer.php")?>

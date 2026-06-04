@@ -1,4 +1,4 @@
-<?php include("include/header.php")?>
+<?php include("../include/header.php")?>
 <section class="relative pt-36 pb-24 overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.12),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.08),transparent_35%)]">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-16 items-center">
@@ -499,6 +499,6 @@
 </section>
 
 <!-- FOOTER -->
- <?php include("include/footer.php")?>
+ <?php include("../include/footer.php")?>
 </body>
 </html>

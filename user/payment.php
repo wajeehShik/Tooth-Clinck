@@ -1,21 +1,67 @@
-<?php include('include/header.php');?>
-<!-- MAIN CONTENT -->
+<?php include('include/header.php');
+$id = $_GET['id'] ?? null;
+$user_id = $_SESSION['id'] ?? null;
+
+if (!$id || !$user_id) {
+    die("خطأ: بيانات غير مكتملة.");
+}
+
+$stmt = $pdo->prepare("SELECT cs.*, s.name as service_name, s.price  as service_price
+                       FROM clinic_slots cs 
+                       JOIN services s ON cs.service_id = s.id 
+                       WHERE cs.id = ? AND cs.user_id = ?");
+$stmt->execute([$id, $user_id]);
+$booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$booking) {
+    die("هذا الموعد غير موجود أو لا تملك صلاحية الوصول إليه.");
+}
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['img'])) {
+ 
+    $booking_id = $_POST['booking_id'];
+    $user_id = $_SESSION['id'];
+    
+    // 1. رفع الصورة
+    $upload_dir = '../docotor/upload/payments/';
+    $file_name = time() . '_' . basename($_FILES['img']['name']);
+    $target_file = $upload_dir . $file_name;
+    
+    if (move_uploaded_file($_FILES['img']['tmp_name'], $target_file)) {
+        
+        try {
+            $sql_payment = "INSERT INTO payments (
+            date_id, user_id,doctor_id,price, status,created_at) 
+                            VALUES (?, ?,2,?, '1', NOW())";
+            $stmt_payment = $pdo->prepare($sql_payment);
+   $stmt_payment->execute([$booking_id, $user_id,$booking['service_price']]);
+
+    echo '<script>alert(\'test\')</script>';
+            $sql_update = "UPDATE clinic_slots SET status = '1' WHERE id = ? AND user_id = ?";
+            $stmt_update = $pdo->prepare($sql_update);
+            $stmt_update->execute([$booking_id, $user_id]);
+            // dd('test');
+            $_SESSION['success']='تمت عملية الدفع بنجاح';
+            header("Location:dashboard.php");
+            exit;
+            
+        } catch (Exception $e) {
+            $pdo->rollBack(); // التراجع في حال حدوث خطأ
+            echo "حدث خطأ: " . $e->getMessage();
+        }
+    } else {
+        echo "فشل رفع الملف.";
+    }
+}
+?>
 <main class="relative pt-36 pb-24 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.05),transparent_35%)]">
     <div class="max-w-4xl mx-auto px-6">
-        
-        <!-- PAGE TITLE -->
         <div class="mb-10 text-center md:text-right">
             <span class="bg-white/70 backdrop-blur-md border border-white/40 px-4 py-2 rounded-full text-emerald-700 font-bold text-sm inline-flex mb-4 shadow-sm">💳 بوابة الدفع الآمنة</span>
             <h1 class="text-4xl font-black text-slate-900">تأكيد حجزك وإرسال الإشعار</h1>
             <p class="text-slate-500 mt-2 text-base">يرجى تحويل المبلغ المطلوب وإرفاق صورة الوصل لتأكيد موعدك الطبي بشكل نهائي.</p>
         </div>
-
-        <!-- TWO COLUMNS LAYOUT -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            
-            <!-- RIGHT COLUMN: SERVICE & PAYMENT DETAILS (تفاصيل الخدمة) -->
             <div class="lg:col-span-1 space-y-6">
-                <!-- بطاقة تفاصيل الخدمة -->
                 <div class="bg-white border border-slate-200/80 rounded-[32px] p-6 shadow-xl shadow-slate-100/50">
                     <h3 class="text-lg font-black text-slate-900 mb-4 pb-3 border-b border-slate-100">تفاصيل الخدمة</h3>
                     
@@ -31,17 +77,17 @@
                         <div class="space-y-2 text-sm text-slate-600">
                             <div class="flex justify-between">
                                 <span class="text-slate-400">التاريخ:</span>
-                                <span class="font-bold text-slate-800">04 يونيو 2026</span>
+                                <span class="font-bold text-slate-800"><?php echo $booking['booking_day'] .'-'.$booking['booking_date']?> </span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-slate-400">الوقت:</span>
-                                <span class="font-bold text-slate-800">04:30 مساءً</span>
+                                <span class="font-bold text-slate-800"><?php echo $booking['time_range']?></span>
                             </div>
                         </div>
 
                         <div class="pt-3 border-t border-dashed border-slate-200 flex justify-between items-center">
                             <span class="font-bold text-slate-900 text-sm">المبلغ المطلوب:</span>
-                            <span class="text-2xl font-black text-emerald-600">80$</span>
+                            <span class="text-2xl font-black text-emerald-600"><?php echo $booking['service_price']?></span>
                         </div>
                     </div>
                 </div>
@@ -55,18 +101,13 @@
                     </div>
                 </div>
             </div>
-
-            <!-- LEFT COLUMN: UPLOAD RECEIPT FORM (رفع إشعار الدفع) -->
             <div class="lg:col-span-2 bg-white border border-slate-200/80 rounded-[32px] p-6 lg:p-8 shadow-xl shadow-slate-100/50">
                 <h3 class="text-xl font-black text-slate-900 mb-6">إرفاق إشعار الدفع الالكتروني</h3>
-                
-                <!-- ملف الفورم مجهز لإرسال الصور (enctype) -->
-                <form action="process-payment.php" method="POST" enctype="multipart/form-data" class="space-y-6">
-                    <div>
+                <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'])?>?id=<?php echo $id?>" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <input type="hidden" name="booking_id" value="<?php echo $id; ?>">  
+                <div>
                         <label class="block text-slate-700 font-bold mb-2 text-sm">صورة إشعار أو وصل الدفع:</label>
                         <div class="relative group border-2 border-dashed border-slate-200 hover:border-sky-400 rounded-3xl bg-slate-50/50 p-8 text-center transition duration-300 flex flex-col items-center justify-center cursor-pointer">
-                            
-                            <!-- أيقونة الرفع -->
                             <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition duration-300">
                                 📸
                             </div>
@@ -75,7 +116,7 @@
                             <p class="text-xs text-slate-400">الصيغ المقبولة: JPG, PNG, PDF (الحد الأقصى: 5MB)</p>
                             
                             <!-- حقل رفع الملف المخفي الذكي الممتد فوق المساحة كاملة -->
-                            <input type="file" name="payment_receipt" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="updateFileName(this)">
+                            <input type="file" name="img" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="updateFileName(this)">
                         </div>
                         
                         <!-- مكان يظهر فيه اسم الملف المرفوع تلقائياً تأكيداً للمريض -->

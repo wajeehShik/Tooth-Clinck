@@ -13,7 +13,17 @@ $clinic_stmt = $pdo->query("SELECT name, logo FROM clinic LIMIT 1");
     $clinic_settings = $clinic_stmt->fetch(PDO::FETCH_ASSOC);
 
 
-    
+    $current_page = basename($_SERVER['PHP_SELF']);
+
+// دالة مختصرة لإرجاع كلاسات التنشيط
+function getNavLinkClass($page, $current_page) {
+    if ($page == $current_page) {
+        // كلاسات الصفحة النشطة
+        return "bg-sky-50 text-sky-600";
+    }
+    // كلاسات الصفحة غير النشطة
+    return "text-slate-500 hover:text-slate-900 hover:bg-slate-50";
+}
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -44,51 +54,54 @@ $clinic_stmt = $pdo->query("SELECT name, logo FROM clinic LIMIT 1");
                     ✕
                 </button>
             </div>
-
-            <nav class="p-4 space-y-1.5 h-[calc(100vh-220px)] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+                <nav class="p-4 space-y-1.5 h-[calc(100vh-220px)] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full">
                 
                 <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">الرئيسية</p>
 
-                <a href="dashboard.php" class="flex items-center justify-between px-4 py-3.5 bg-sky-50 text-sky-600 font-bold rounded-2xl group transition-all duration-200">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xl group-hover:scale-110 transition-transform duration-200">📊</span>
-                        <span class="text-sm">الإحصائيات العامة</span>
-                    </div>
-                    <span class="w-2 h-2 rounded-full bg-sky-500"></span>
-                </a>
+          <a href="dashboard.php" class="flex items-center justify-between px-4 py-3.5 <?= getNavLinkClass('dashboard.php', $current_page) ?> rounded-2xl group transition-all duration-200">
+    <div class="flex items-center gap-3">
+        <span class="text-xl group-hover:scale-110 transition-transform duration-200">📊</span>
+        <span class="text-sm">الإحصائيات العامة</span>
+    </div>
+    <?php if($current_page === 'dashboard.php'): ?><span class="w-2 h-2 rounded-full bg-sky-500"></span><?php endif; ?>
+</a>
 
-                <a href="dates.php" class="flex items-center gap-3 px-4 py-3.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-2xl group transition-all duration-200">
-                    <span class="text-xl group-hover:scale-110 transition-transform duration-200">📅</span>
-                    <span class="text-sm">الحجوزات والمواعيد</span>
-                </a>
+<a href="dates.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('dates.php', $current_page) ?> rounded-2xl group transition-all duration-200">
+    <span class="text-xl group-hover:scale-110 transition-transform duration-200">📅</span>
+    <span class="text-sm">الحجوزات والمواعيد</span>
+</a>
 
-                <a href="users.php" class="flex items-center justify-between px-4 py-3.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-2xl group transition-all duration-200">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xl group-hover:scale-110 transition-transform duration-200">👥</span>
-                        <span class="text-sm">إدارة المرضى</span>
-                    </div>
-                </a>
-                <a href="services.php" class="flex items-center gap-3 px-4 py-3.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-2xl group transition-all duration-200">
-                    <span class="text-xl group-hover:scale-110 transition-transform duration-200">💼</span>
-                    <span class="text-sm">الخدمات والأسعار</span>
-                </a>
-                <a href="session.php" class="flex items-center gap-3 px-4 py-3.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-2xl group transition-all duration-200">
-                    <span class="text-xl group-hover:scale-110 transition-transform duration-200">🩺</span>
-                    <span class="text-sm">الجلسات </span>
-                </a>
-                <a href="clinic.php" class="flex items-center gap-3 px-4 py-3.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-2xl group transition-all duration-200">
-                    <span class="text-xl group-hover:scale-110 transition-transform duration-200">⚙️</span>
-                    <span class="text-sm">إعدادات العيادة</span>
-                </a>
+<a href="users.php" class="flex items-center px-4 py-3.5 <?= getNavLinkClass('users.php', $current_page) ?> rounded-2xl group transition-all duration-200">
+    <div class="flex items-center gap-3">
+        <span class="text-xl group-hover:scale-110 transition-transform duration-200">👥</span>
+        <span class="text-sm">إدارة المرضى</span>
+    </div>
+</a>
 
-                <a href="profile.php" class="flex items-center gap-3 px-4 py-3.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-2xl group transition-all duration-200">
-                    <span class="text-xl group-hover:scale-110 transition-transform duration-200">⚙️</span>
-                    <span class="text-sm"> حساب الشخصي</span>
-                </a>
-                <a href="faqs.php" class="flex items-center gap-3 px-4 py-3.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-2xl group transition-all duration-200">
-                    <span class="text-xl group-hover:scale-110 transition-transform duration-200">⚙️</span>
-                    <span class="text-sm">أسئلة الشائعة </span>
-                </a>
+<a href="services.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('services.php', $current_page) ?> rounded-2xl group transition-all duration-200">
+    <span class="text-xl group-hover:scale-110 transition-transform duration-200">💼</span>
+    <span class="text-sm">الخدمات والأسعار</span>
+</a>
+
+<a href="session.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('session.php', $current_page) ?> rounded-2xl group transition-all duration-200">
+    <span class="text-xl group-hover:scale-110 transition-transform duration-200">🩺</span>
+    <span class="text-sm">الجلسات</span>
+</a>
+
+<a href="clinic.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('clinic.php', $current_page) ?> rounded-2xl group transition-all duration-200">
+    <span class="text-xl group-hover:scale-110 transition-transform duration-200">⚙️</span>
+    <span class="text-sm">إعدادات العيادة</span>
+</a>
+
+<a href="profile.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('profile.php', $current_page) ?> rounded-2xl group transition-all duration-200">
+    <span class="text-xl group-hover:scale-110 transition-transform duration-200">👤</span>
+    <span class="text-sm">الحساب الشخصي</span>
+</a>
+
+<a href="faqs.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('faqs.php', $current_page) ?> rounded-2xl group transition-all duration-200">
+    <span class="text-xl group-hover:scale-110 transition-transform duration-200">❓</span>
+    <span class="text-sm">الأسئلة الشائعة</span>
+</a>
             </nav>
         </div>
 

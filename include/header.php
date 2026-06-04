@@ -1,8 +1,10 @@
 <?php
 ob_start();
+define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT'] . '/tooth/');
 session_start();
-require_once("./config/db.php");
+require_once(ROOT_PATH ."/config/db.php");
 
+    $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : 'guest';
 
 
 ?>
@@ -14,13 +16,7 @@ require_once("./config/db.php");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DentalCare test</title>
     <!-- تضمين مكتبة Tailwind وخط Cairo -->
-    <!-- <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"> -->
-<!-- <link rel="stylesheet" href="tailwind.css"> -->
-
-<link href="output.css" rel="stylesheet">
-<!-- <script src="https://cdn.tailwindcss.com"></script> -->
-    <!-- إعداد الخط الافتراضي والخلفية لـ Tailwind -->
+<link href="/tooth/output.css" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -63,16 +59,19 @@ require_once("./config/db.php");
                 <a href="#reviews" class="hover:text-sky-500 transition">آراء المرضى</a>
                 <a href="#faq" class="hover:text-sky-500 transition">الأسئلة الشائعة</a>
                 <a href="#contact" class="hover:text-sky-500 transition">تواصل معنا</a>
+                    <?php if ($user_role === 'user'){ ?>
+                <a href="/tooth/user/booking.php" class="hover:text-sky-500 transition">حجز موعد </a>
+
+                <?php }?>
             </nav><!-- BUTTONS & USER PROFILE AREA -->
 <div class="flex items-center gap-4">
 
     <?php 
     // التحقق من حالة الدور (Role) من السيشين مباشرة
     // إذا لم يكن السيشين موجوداً، نعتبره زائر (Guest)
-    $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : 'guest';
     
     // جلب اسم المستخدم لعرضه في البروفايل (تأكد من تخزينه عند تسجيل الدخول)
-    $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'المستخدم'; 
+    $user_name = isset($_SESSION['name']) ? $_SESSION['name'] : 'المستخدم'; 
     ?>
 
     <?php if ($user_role === 'guest'): ?>
@@ -87,9 +86,7 @@ require_once("./config/db.php");
         </a>
 
     <?php elseif ($user_role === 'user'): ?>
-        <!-- 2. حالة المريض المسجل (Patient) -->
         <div class="relative inline-block text-right group">
-            <!-- الزر الرئيسي للبروفايل -->
             <button class="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white border border-slate-100 shadow-sm hover:bg-slate-50 transition cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center font-black text-base">
                     <!-- عرض أول حرف من الاسم بشكل جمالي -->
@@ -99,31 +96,27 @@ require_once("./config/db.php");
                     <p class="text-xs text-slate-400 font-medium leading-none mb-1">مرحباً بك</p>
                     <p class="text-sm font-bold text-slate-700 leading-none"><?= $user_name; ?></p>
                 </div>
-                <!-- سهم حركة لأسفل -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 transition transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
-            <!-- القائمة المنسدلة للمريض -->
             <div class="absolute left-0 mt-2 w-52 origin-top-left bg-white border border-slate-100 rounded-2xl shadow-xl opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition transform duration-200 z-50 overflow-hidden">
                 <div class="p-1">
-                    <a href="user/dashboard.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-sky-600 rounded-xl transition">
+                    <a href="/tooth/user/dashboard.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-sky-600 rounded-xl transition">
                         <span>👤</span> الملف الشخصي
                     </a>
-                    <a href="my-appointments.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-sky-600 rounded-xl transition">
-                        <span>📅</span> مواعيدي وحجوزاتي
+                    <a href="/tooth/user/all_bookings.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-sky-600 rounded-xl transition">
+                        <span>📅</span> حجوزاتي
                     </a>
                     <hr class="border-slate-100 my-1">
-                    <a href="logout.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition">
+                    <a href="/tooth/logout.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition">
                         <span>🚪</span> تسجيل الخروج
                     </a>
                 </div>
             </div>
         </div>
     <?php elseif ($user_role === 'doctor'): ?>
-        <!-- 3. حالة الدكتور (Doctor) -->
         <div class="relative inline-block text-right group">
-            <!-- كارد دكتور فخم باللون الداكن المتناسق مع الثيم -->
             <button class="flex items-center gap-3 px-4 py-2 rounded-2xl bg-slate-900 text-white shadow-xl shadow-slate-900/10 hover:bg-slate-800 transition cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center font-black text-lg">
                     👨‍⚕️
@@ -140,10 +133,10 @@ require_once("./config/db.php");
             <!-- قائمة التحكم المنسدلة للدكتور -->
             <div class="absolute left-0 mt-2 w-52 origin-top-left bg-white border border-slate-100 rounded-2xl shadow-xl opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto transition transform duration-200 z-50 overflow-hidden">
                 <div class="p-1">
-                    <a href="docotor/dashboard.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 rounded-xl transition">
+                    <a href="/tooth/docotor/dashboard.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 rounded-xl transition">
                         <span>📊</span> لوحة التحكم
                     </a>
-                    <a href="logout.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition">
+                    <a href="/tooth/logout.php" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition">
                         <span>🚪</span> تسجيل الخروج
                     </a>
                 </div>

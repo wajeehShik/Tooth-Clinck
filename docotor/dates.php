@@ -129,7 +129,14 @@ $saturday_view_week = date('Y-m-d', $saturday_ts);
 $wednesday_view_week = date('Y-m-d', strtotime('+4 days', $saturday_ts));
 
 $all_slots = [];
-$query = $pdo->prepare("SELECT * FROM clinic_slots WHERE booking_date BETWEEN ? AND ? ORDER BY time_range ASC");
+$query = $pdo->prepare("
+SELECT cs.*, u.name as patient_name 
+FROM clinic_slots cs 
+LEFT JOIN users u ON cs.user_id = u.id 
+WHERE cs.booking_date BETWEEN ? AND ? 
+ORDER BY cs.time_range ASC
+");
+
 $query->execute([$saturday_view_week, $wednesday_view_week]);
 
 while ($row = $query->fetch(PDO::FETCH_ASSOC)) {

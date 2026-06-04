@@ -1,27 +1,36 @@
-<?php include ('include/header.php')?>
-
-<!-- المحتوى الرئيسي للوحة تحكم الحجوزات والجلسات -->
-<main class="p-4 sm:p-8 flex-1 max-w-6xl w-full mx-auto space-y-6 pt-32 pb-24 bg-slate-50">
+<?php include ('include/header.php');
+$stmt=$pdo->prepare("SELECT cs.*, u.name as patient_name, s.name as service_name 
+FROM clinic_slots cs
+INNER JOIN users u ON cs.user_id = u.id
+INNER JOIN services s ON cs.service_id = s.id
+ORDER BY 
+    cs.booking_date ASC, 
+    cs.time_range ASC;  ");
+    $stmt->execute();
+    $bookings=$stmt->fetchAll();
+if ($_SERVER['REQUEST_METHOD'] == 'POST' ) {
     
-    <!-- شريط علوي مع أزرار التحكم -->
+    $booking_id = $_POST['id'];
+    $sql = "UPDATE clinic_slots SET status = '2' WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$booking_id]);
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+}
+?>
+<main class="p-4 sm:p-8 flex-1 max-w-6xl w-full mx-auto space-y-6 pt-32 pb-24 bg-slate-50">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white border border-slate-100 p-6 rounded-[24px] shadow-sm">
         <div>
             <h1 class="text-2xl font-black text-slate-900 mb-1">إدارة الحجوزات وجلسات المرضى 📅</h1>
             <p class="text-slate-400 text-xs font-bold">جدولة مواعيد العيادة، متابعة حالات الدفع، التقييمات، وإضافة جلسات المتابعة الدورية.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <!-- زر إضافة جلسة لمريض سابق -->
             <button onclick="openModal('addSessionModal')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs px-4 py-3.5 rounded-xl transition-all flex items-center gap-2">
                 <span>🦷</span> إضافة جلسة لمريض سابق
             </button>
-            <!-- زر إضافة حجز جديد -->
-            <button onclick="openModal('addBookingModal')" class="bg-sky-500 hover:bg-sky-600 text-white font-black text-xs px-5 py-3.5 rounded-xl shadow-md shadow-sky-100 transition-all flex items-center gap-2">
-                <span>📅</span> إضافة حجز جديد
-            </button>
+          
         </div>
     </div>
-
-    <!-- جدول الحجوزات الشامل -->
     <div class="bg-white border border-slate-100 rounded-[24px] overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-right border-collapse">
@@ -29,94 +38,88 @@
                     <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-400 text-xs font-bold">
                         <th class="p-5">اسم المريض والخدمة</th>
                         <th class="p-5">الموعد والتوقيت</th>
-                        <th class="p-5">الحالة الطبية</th>
                         <th class="p-5">حالة الدفع</th>
-                        <th class="p-5">التقييم</th>
                         <th class="p-5">ملاحظات المريض</th>
                         <th class="p-5 text-left">إجراءات سريعة</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50 font-medium text-xs sm:text-sm text-slate-700">
-                    
-                    <!-- مثال 1: وجيه أحمد (قيد الانتظار - مع خيار إنهاء الموعد السريع) -->
+                   <?php foreach($bookings as $booking){?>
                     <tr id="booking-row-1" class="hover:bg-slate-50/40 transition-colors">
                         <td class="p-5">
                             <div class="flex items-center gap-2">
                                 <span id="status-indicator-1" class="w-2 h-2 rounded-full bg-amber-400"></span>
                                 <div>
-                                    <h4 class="font-bold text-slate-900 text-sm">وجيه أحمد</h4>
-                                    <span class="text-[10px] text-slate-400 block font-bold">علاج عصب وسن</span>
+                                    <h4 class="font-bold text-slate-900 text-sm"> <?php echo $booking['patient_name']?></h4>
+                                    <span class="text-[10px] text-slate-400 block font-bold"><?php echo $booking['service_name']?></span>
                                 </div>
                             </div>
                         </td>
                         <td class="p-5">
-                            <span class="text-slate-800 font-bold block">الأربعاء القادم</span>
-                            <span class="text-[11px] text-slate-400 font-semibold block">09:00 AM - 11:00 AM</span>
+                            <span class="text-slate-800 font-bold block"><?php echo $booking['booking_day']?> القادم</span>
+                            <span class="text-[11px] text-slate-400 font-semibold block"><?php echo $booking['time_range']?></span>
                         </td>
                         <td class="p-5">
-                            <span id="status-badge-1" class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md font-bold text-xs transition-all">قيد الانتظار</span>
-                        </td>
-                        <td class="p-5">
+                            <?php
+if($booking['status']=='0'){?>
                             <span class="bg-rose-50 text-rose-600 border border-rose-100 px-2.5 py-1 rounded-md font-bold text-xs">لم يدفع بعد</span>
-                        </td>
-                        <td class="p-5">
-                            <span class="text-slate-300 font-bold text-xs">—</span>
-                        </td>
-                        <td class="p-5 text-slate-400 text-xs max-w-[180px] truncate" title="يعاني من ألم حاد عند شرب الماء البارد">
-                            يعاني من ألم حاد عند شرب الماء البارد...
-                        </td>
-                        <td class="p-5 text-left flex items-center justify-end gap-1.5">
-                            <!-- زر إنهاء الجلسة الذكي والمطلوب -->
-                            <button onclick="completeSession(1)" id="complete-btn-1" title="تحديث إلى: تم انتهاء الجلسة" class="bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-600 font-bold p-2 rounded-lg border border-emerald-100 text-xs transition-all flex items-center gap-1">
-                                <span>✓</span> إنهاء الجلسة
-                            </button>
-                            <button class="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold p-2 rounded-lg border border-slate-200 text-xs transition-all">⚙️</button>
-                        </td>
-                    </tr>
+<?php
+}else if($booking['status']=='1'){
+?>
+                            <span class="bg-green-200 text-shadow-black border border-green-950 px-2.5 py-1 rounded-md font-bold text-xs">  دفع ابنتظار الموعد</span>
 
-                    <!-- مثال 2: مريض منتهي ودافع ومقيم جاهز -->
-                    <tr id="booking-row-2" class="hover:bg-slate-50/40 transition-colors bg-emerald-50/10">
-                        <td class="p-5">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                <div>
-                                    <h4 class="font-bold text-slate-900 text-sm">محمد علي</h4>
-                                    <span class="text-[10px] text-slate-400 block font-bold">تنظيف وتبييض ليزر</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="p-5">
-                            <span class="text-slate-800 font-bold block">أمس، الأحد</span>
-                            <span class="text-[11px] text-slate-400 font-semibold block">01:00 PM - 02:00 PM</span>
-                        </td>
-                        <td class="p-5">
-                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md font-bold text-xs">تم انتهاء الجلسة ✓</span>
-                        </td>
-                        <td class="p-5">
-                            <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-1 rounded-md font-bold text-xs">تم الدفع الكلي</span>
-                        </td>
-                        <td class="p-5">
-                            <span class="text-amber-500 font-bold text-xs">⭐⭐⭐⭐⭐</span>
+<?php }else { ?>
+                            <span class="bg-green-200 text-shadow-black border border-green-950 px-2.5 py-1 rounded-md font-bold text-xs">  انتهت جلسة وتقييم</span>
+
+
+<?php }?>
                         </td>
                         <td class="p-5 text-slate-400 text-xs max-w-[180px] truncate">
-                            طلب موعد مسائي يتناسب مع عمله.
-                        </td>
+<?php echo $booking['notes']?>                        </td>
                         <td class="p-5 text-left flex items-center justify-end gap-1.5">
-                            <span class="text-emerald-600 font-bold text-xs px-2 py-1 bg-emerald-100/50 rounded-lg">مكتمل</span>
-                            <button class="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold p-2 rounded-lg border border-slate-200 text-xs transition-all">⚙️</button>
+<?php if($booking['status']=='0'){?>
+
+
+                        <span>x</span> انتظار الدفع 
+<?php }else if($booking['status']=='1'){?>
+<form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>">
+    <input type="hidden" name="action" value="end_session">
+    <input type="hidden" name="id" value="<?= $booking['id'] ?>">
+    
+
+<button type="submit" class="bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-600 font-bold p-2 rounded-lg border border-emerald-100 text-xs transition-all flex items-center gap-1 cursor-pointer">
+        <span>✓</span> إنهاء الجلسة
+    </button>
+</form>
+
+<?php }else{
+    $stmt=$pdo->prepare('select rating from  ratings where slot_id=? ');
+    $stmt->execute([$booking['id']]);
+    $rating=$stmt->fetch();    
+  if (!empty($rating)){ ?>
+    <div class="flex text-amber-400 text-2xl">
+        <?php 
+            $stars = (int)$rating; // الرقم من قاعدة البيانات
+            for ($i = 1; $i <= 5; $i++) {
+                echo ($i <= $stars) ? '★' : '☆';
+            }
+        ?>
+    </div>
+<?php }else{ ?>
+    <span class="text-slate-300  text-2xl">بدون تقييم</span>
+<?php } ?>
+    
+
+          <?php }?>
+          
                         </td>
                     </tr>
-
+<?php }?>
                 </tbody>
             </table>
         </div>
     </div>
 </main>
-
-
-<!-- ================= النوافذ المنبثقة (Modals) ================= -->
-
-<!-- 1. نافذة إضافة حجز جديد -->
 <div id="addBookingModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-[28px] max-w-xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto custom-scrollbar">
         <div class="flex items-center justify-between mb-6">
@@ -201,9 +204,6 @@
         </form>
     </div>
 </div>
-
-
-<!-- 2. نافذة إضافة جلسة جديدة لمرضى مسجلين سابقاً -->
 <div id="addSessionModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-[28px] max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
         <div class="flex items-center justify-between mb-6">
@@ -238,9 +238,6 @@
         </form>
     </div>
 </div>
-
-
-<!-- كود الـ JavaScript المطور للتحكم في النوافذ والإنهاء السريع -->
 <script>
 function openModal(modalId) {
     document.getElementById(modalId).classList.remove('hidden');
@@ -257,31 +254,6 @@ function toggleRatingSection() {
     } else {
         ratingSection.classList.add('hidden');
     }
-}
-
-// دالة الإنهاء السريع الذكية للجلسات والمواعيد بنقرة واحدة
-function completeSession(id) {
-    // 1. تحويل المظهر فوراً للأخضر للدلالة على اكتمال الموعد بنجاح
-    document.getElementById('status-indicator-' + id).className = "w-2 h-2 rounded-full bg-emerald-500";
-    
-    const badge = document.getElementById('status-badge-' + id);
-    badge.className = "bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md font-bold text-xs transition-all";
-    badge.innerText = "تم انتهاء الجلسة ✓";
-    
-    // 2. إضفاء طابع الخلفية المكتملة على السطر الكامل وتغيير شكل الزر
-    document.getElementById('booking-row-' + id).classList.add('bg-emerald-50/10');
-    
-    const btn = document.getElementById('complete-btn-' + id);
-    btn.outerHTML = `<span class="text-emerald-600 font-bold text-xs px-2 py-1 bg-emerald-100/50 rounded-lg">مكتمل</span>`;
-
-    // 3. (اختياري للخلفية) يمكنك هنا إرسال طلب أجاكس (AJAX) سريع لتحديث قاعدة البيانات بدون تنشيط الصفحة
-    /*
-    fetch('process-booking.php?action=quick_complete&id=' + id)
-    .then(response => response.json())
-    .then(data => console.log('تم التحديث في قاعدة البيانات'));
-    */
-    
-    alert('🎉 رائـع! تم تحويل حالة الجلسة إلى (تم انتهاء الجلسة واكتمل العلاج) بنجاح.');
 }
 </script>
 
