@@ -81,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     exit;
 }
     ?>
-    <div class="pr-0 lg:pr-72 w-full min-h-screen flex flex-col transition-all duration-300">
+    <div class="pr-0 lg:pr-10 w-full min-h-screen flex flex-col transition-all duration-300">
         <main class="p-4 sm:p-8 flex-1 max-w-4xl w-full mx-auto space-y-6 sm:space-y-8">
            <?php if (!empty($_SESSION['errors'])): ?>
             <div class="bg-red-50 border border-red-100 text-red-700 p-5 rounded-[22px] text-sm font-semibold space-y-1 shadow-sm">

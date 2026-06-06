@@ -54,11 +54,11 @@ require_once(ROOT_PATH ."/config/db.php");
             <!-- NAV -->
             <nav class="hidden lg:flex items-center gap-8 text-slate-700 font-bold">
                 <a href="index.php" class="hover:text-sky-500 transition">الرئيسية</a>
-                <a href="#services" class="hover:text-sky-500 transition">الخدمات</a>
-                <a href="#about" class="hover:text-sky-500 transition">عن العيادة</a>
-                <a href="#reviews" class="hover:text-sky-500 transition">آراء المرضى</a>
-                <a href="#faq" class="hover:text-sky-500 transition">الأسئلة الشائعة</a>
-                <a href="#contact" class="hover:text-sky-500 transition">تواصل معنا</a>
+                <a href="index.php#services" class="hover:text-sky-500 transition">الخدمات</a>
+                <a href="index.php#about" class="hover:text-sky-500 transition">عن العيادة</a>
+                <a href="index.php#reviews" class="hover:text-sky-500 transition">آراء المرضى</a>
+                <a href="index.php#faq" class="hover:text-sky-500 transition">الأسئلة الشائعة</a>
+                <a href="index.php#contact" class="hover:text-sky-500 transition">تواصل معنا</a>
                     <?php if ($user_role === 'user'){ ?>
                 <a href="/tooth/user/booking.php" class="hover:text-sky-500 transition">حجز موعد </a>
 
@@ -67,13 +67,8 @@ require_once(ROOT_PATH ."/config/db.php");
 <div class="flex items-center gap-4">
 
     <?php 
-    // التحقق من حالة الدور (Role) من السيشين مباشرة
-    // إذا لم يكن السيشين موجوداً، نعتبره زائر (Guest)
-    
-    // جلب اسم المستخدم لعرضه في البروفايل (تأكد من تخزينه عند تسجيل الدخول)
     $user_name = isset($_SESSION['name']) ? $_SESSION['name'] : 'المستخدم'; 
     ?>
-
     <?php if ($user_role === 'guest'): ?>
         <!-- 1. حالة الزائر (غير مسجل دخول) -->
         <a href="login.php" class="hidden md:flex px-5 py-3 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition text-sm">

@@ -7,14 +7,9 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'doctor') {
     header("Location:../index.php");
     exit();
 }
-
-
 $clinic_stmt = $pdo->query("SELECT name, logo FROM clinic LIMIT 1");
     $clinic_settings = $clinic_stmt->fetch(PDO::FETCH_ASSOC);
-
-
     $current_page = basename($_SERVER['PHP_SELF']);
-
 // دالة مختصرة لإرجاع كلاسات التنشيط
 function getNavLinkClass($page, $current_page) {
     if ($page == $current_page) {
@@ -24,6 +19,9 @@ function getNavLinkClass($page, $current_page) {
     // كلاسات الصفحة غير النشطة
     return "text-slate-500 hover:text-slate-900 hover:bg-slate-50";
 }
+$stmt=$pdo->prepare("select name from doctors");
+$stmt->execute();
+$user=$stmt->fetch();
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -77,17 +75,17 @@ function getNavLinkClass($page, $current_page) {
         <span class="text-sm">إدارة المرضى</span>
     </div>
 </a>
-
 <a href="services.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('services.php', $current_page) ?> rounded-2xl group transition-all duration-200">
     <span class="text-xl group-hover:scale-110 transition-transform duration-200">💼</span>
     <span class="text-sm">الخدمات والأسعار</span>
 </a>
-
+<a href="payment.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('payment.php', $current_page) ?> rounded-2xl group transition-all duration-200">
+<span class="text-xl group-hover:scale-110 transition-transform duration-200">💳</span>    <span class="text-sm">الدفع </span>
+</a>
 <a href="session.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('session.php', $current_page) ?> rounded-2xl group transition-all duration-200">
     <span class="text-xl group-hover:scale-110 transition-transform duration-200">🩺</span>
     <span class="text-sm">الجلسات</span>
 </a>
-
 <a href="clinic.php" class="flex items-center gap-3 px-4 py-3.5 <?= getNavLinkClass('clinic.php', $current_page) ?> rounded-2xl group transition-all duration-200">
     <span class="text-xl group-hover:scale-110 transition-transform duration-200">⚙️</span>
     <span class="text-sm">إعدادات العيادة</span>
@@ -111,7 +109,7 @@ function getNavLinkClass($page, $current_page) {
                      د.أ
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-slate-900 truncate">د. أحمد مصطفى</p>
+                    <p class="text-sm font-bold text-slate-900 truncate">د.  <?php echo $user['name']?></p>
                     <p class="text-xs text-slate-400 truncate">مدير النظام</p>
                 </div>
             </div>

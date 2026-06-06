@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'dental_clinic_db2';
+$dbname = 'dental_clinic_db';
 $username = 'root';
 $password = '';
 

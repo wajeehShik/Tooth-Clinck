@@ -1,4 +1,4 @@
-<?php include('include/header.php');
+<?php include('../include/header.php');
 // التأكد من وجود معرف الموعد
 $id = $_GET['id'] ?? null; 
 $user_id = $_SESSION['id'] ?? null;
@@ -6,8 +6,6 @@ $user_id = $_SESSION['id'] ?? null;
 if (!$id || !$user_id) {
     die("خطأ: بيانات غير مكتملة.");
 }
-
-// جلب تفاصيل الحجز
 $stmt = $pdo->prepare("SELECT cs.*, s.name as service_name FROM clinic_slots cs 
                        JOIN services s ON cs.service_id = s.id 
                        WHERE cs.id = ? AND cs.user_id = ?");
@@ -17,20 +15,18 @@ $booking = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$booking) {
     die("الموعد غير موجود.");
 }
-// معالجة نموذج التقييم
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rating'])) {
     $rating = (int)$_POST['rating'];
     $notes = htmlspecialchars($_POST['notes']);
-    
     $sql = "INSERT INTO ratings (slot_id, user_id, rating, notes, created_at) VALUES (?, ?, ?, ?, NOW())";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$id, $user_id, $rating, $notes]);
-    $sql_update = "UPDATE clinic_slots SET status = '2' WHERE id = ? AND user_id = ?";
+    $sql_update = "UPDATE clinic_slots SET status = '4' WHERE id = ? AND user_id = ?";
             $stmt_update = $pdo->prepare($sql_update);
             $stmt_update->execute([$id, $user_id]);
 
     $_SESSION['success'] = 'شكراً لتقييمك!';
-    header("Location: dashboard.php");
+    header("Location: all_bookings.php");
     exit;
 }
 ?>

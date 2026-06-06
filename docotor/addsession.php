@@ -1,10 +1,9 @@
 <?php
-include("../include/header.php");
+include("include/header.php");
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-$current_user_id = $_SESSION['id'];
 if (isset($_GET['get_slots']) && $_GET['get_slots'] == 'true' && isset($_GET['day'])) {
     if (ob_get_length()) ob_clean();
     header('Content-Type: application/json; charset=utf-8');
@@ -19,16 +18,18 @@ if (isset($_GET['get_slots']) && $_GET['get_slots'] == 'true' && isset($_GET['da
 }
 $success_msg = $error_msg = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
+    $user_id=$_POST['user_id'];
     $slot_id = $_POST['slot_id'] ?? '';
     $service_id = $_POST['specialty'] ?? '';
+    $status_payment=$_POST['status_payment'];
+
 
     if (!empty($slot_id) && !empty($service_id)) {
         try {
-            $stmt = $pdo->prepare("UPDATE clinic_slots SET is_booked = 1, user_id = ?, service_id = ? WHERE id = ? AND is_booked = 0");
-            if ($stmt->execute([$current_user_id, $service_id, $slot_id])) {
+            $stmt = $pdo->prepare("UPDATE clinic_slots SET status=?, is_booked = 1, user_id = ?, service_id = ? WHERE id = ? AND is_booked = 0");
+            if ($stmt->execute([$status_payment,$user_id, $service_id, $slot_id])) {
                 $success_msg = "تم تأكيد موعدك بنجاح! 🎉";
-
-                header("Location:dashboard.php");
+                header("Location:session.php");
                 exit;
             } else {
                 $error_msg = "عذراً، هذا الموعد تم حجزه للتو.";
@@ -38,9 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
         }
     }
 }
-
-// 4. جلب الخدمات
 $services = $pdo->query("SELECT id, name FROM services WHERE status = 1")->fetchAll(PDO::FETCH_ASSOC);
+$stmt=$pdo->prepare("select * from users");
+$stmt->execute();
+$users=$stmt->fetchAll();
 ?>
 
 <main class="min-h-screen bg-slate-50 pt-24 pb-20">
@@ -48,15 +50,26 @@ $services = $pdo->query("SELECT id, name FROM services WHERE status = 1")->fetch
         <?php if($success_msg): ?>
             <div class="mb-8 bg-emerald-50 text-emerald-800 p-4 rounded-2xl font-bold border border-emerald-200"><?php echo $success_msg; ?></div>
         <?php endif; ?>
-
-        <div class="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-                <h1 class="text-6xl font-black text-slate-900 mb-6">رعايتك الصحية <span class="text-sky-500">تبدأ بخطوة</span></h1>
-                <p class="text-slate-600 text-xl mb-10">نظام حجز ذكي يوفر وقتك وجهدك. اختر خدمتك، حدد موعدك، وانطلق نحو صحة أفضل.</p>
-            </div>
-
             <div class="bg-white rounded-[40px] p-10 shadow-2xl border border-slate-100">
-                <form action="" method="POST" class="space-y-6">
+                <form action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST" class="space-y-6">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-2">اختر مريض</label>
+                        <select name="user_id" required class="w-full h-14 rounded-xl border border-slate-200 px-4">
+                            <option value="">اختر مريض</option>
+                            <?php foreach($users as $user){?>
+                            <option value="<?php echo $user['id']?>"><?php echo $user['name']?></option>
+                            <?php }?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-2">حالة الدفع </label>
+                        <select  name="status_payment" required class="w-full h-14 rounded-xl border border-slate-200 px-4">
+                            <option value="">اختر اليوم</option>
+                            <option value="1">لم يدفع</option>
+                            <option value="2">دفع</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label class="block font-bold text-slate-600 mb-2">التخصص والخدمة</label>
                         <select name="specialty" required class="w-full h-14 rounded-xl border border-slate-200 px-4">
@@ -78,7 +91,6 @@ $services = $pdo->query("SELECT id, name FROM services WHERE status = 1")->fetch
                             <option value="الخميس">الخميس</option>
                         </select>
                     </div>
-
                     <div>
                         <label class="block font-bold text-slate-600 mb-2">الوقت المتاح</label>
                         <select id="booking_time" name="slot_id" required disabled class="w-full h-14 rounded-xl border border-slate-200 px-4 disabled:bg-slate-100">
@@ -112,4 +124,4 @@ document.getElementById('booking_day').addEventListener('change', function() {
 });
 </script>
 
-<?php include("../include/footer.php"); ?>
+<?php include("include/footer.php"); ?>

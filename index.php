@@ -39,23 +39,20 @@ $faqs = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </p>
 
                 <div class="flex flex-wrap gap-4 pt-4">
-                    <button class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-sky-600 transition-all duration-300 shadow-lg shadow-sky-200">
+                    <a href="register.php" class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-sky-600 transition-all duration-300 shadow-lg shadow-sky-200">
                         احجز استشارتك الآن
-                    </button>
-                    <button class="px-8 py-4 bg-white text-slate-700 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all">
+</a>
+                    <a href="#services"  class="px-8 py-4 bg-white text-slate-700 rounded-2xl font-bold border border-slate-200 hover:bg-slate-50 transition-all">
                         استعرض خدماتنا
-                    </button>
+</a>
                 </div>
             </div>
-
-            <!-- الجانب البصري (كارت العرض) -->
             <div class="lg:col-span-5 relative">
                 <div class="relative bg-white p-4 rounded-[3rem] shadow-2xl border border-white/50 rotate-2 hover:rotate-0 transition-transform duration-500">
                     <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800" 
                          alt="عيادة أسنان" 
                          class="rounded-[2.5rem] w-full h-[400px] object-cover">
                     
-                    <!-- إحصائية عائمة -->
                     <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-3xl shadow-xl border border-slate-100">
                         <div class="flex items-center gap-4">
                             <div class="bg-sky-100 p-3 rounded-2xl text-sky-600">
@@ -73,55 +70,57 @@ $faqs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 </section>
-<section class="py-24 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl lg:text-5xl font-black text-slate-900 mb-4">خدماتنا المتميزة</h2>
-            <p class="text-slate-500 text-lg">اختر الخدمة المناسبة واحجز موعدك بكل سهولة</p>
-        </div>
 
-       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-    <?php foreach ($services as $service): ?>
-        
-        <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-sky-100 transition-all duration-500 flex flex-col justify-between">
-            
-            <div>
-                <div class="w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center mb-6 text-sky-500 text-3xl">
-                    🦷
-                </div>
-
-                <h3 class="text-2xl font-bold text-slate-900 mb-3">
-                    <?= htmlspecialchars($service['name']) ?>
-                </h3>
-
-                <p class="text-slate-500 mb-6 leading-relaxed">
-                    <?= htmlspecialchars($service['description']) ?>
-                </p>
-            </div>
-            <div>
-                <div class="flex items-center justify-between mb-6">
-                    <span class="text-2xl font-black text-slate-900">
-                        <?= $service['price'] ?> شيكل
-                    </span>
-
-                    <span class="text-sm font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full">
-                        <?= $service['sessions_count'] ?> جلسة
-                    </span>
-                </div>
-
-                <button class="w-full py-4 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-2xl transition duration-300 transform hover:scale-[1.02]">
-                    احجز هذه الخدمة
-                </button>
-            </div>
-
-        </div>
-
-    <?php endforeach; ?>
-
-</div>
+<section  id="services" class="relative pt-32 pb-12 overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.06),transparent_30%)] bg-slate-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-8 text-center">
+        <span class="bg-sky-50 text-sky-600 border border-sky-100 px-4 py-2 rounded-full text-xs font-bold inline-flex mb-4 shadow-sm">
+            🦷 خدماتنا الطبية المتكاملة
+        </span>
+        <h1 class="text-4xl font-black text-slate-900 mb-4">أفضل خدمات طب الأسنان</h1>
+        <p class="text-slate-500 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+            نقدم لك رعاية طبية متخصصة بأحدث التقنيات لضمان ابتسامة صحية ودائمة. شفافيه تامة في الأسعار وعدد الجلسات المتوقعة لكل علاج.
+        </p>
     </div>
 </section>
+<main class="p-4 sm:p-8 max-w-6xl w-full mx-auto space-y-8 bg-slate-50 pb-24">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <?php foreach($services as $service){?>
+        <!-- الخدمة 1: علاج عصب السن -->
+        <div class="bg-white border border-slate-100 rounded-[28px] p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+            <div>
+                <div class="w-14 h-14 bg-sky-50 rounded-2xl flex items-center justify-center text-2xl text-sky-500 mb-5 group-hover:scale-110 transition-transform">🦷</div>
+                <h3 class="text-xl font-black text-slate-900 mb-2">  <?php echo $service['name']?></h3>
+                <p class="text-slate-400 text-xs leading-relaxed mb-6"><?php echo $service['description']?></p>
+                
+                <!-- المواصفات العلاجية -->
+                <div class="space-y-2.5 border-t border-slate-50 pt-4 mb-6">
+                    <div class="flex items-center justify-between text-xs font-bold">
+                        <span class="text-slate-400">عدد الجلسات:</span>
+                        <span class="text-sky-600 bg-sky-50 px-3 py-1 rounded-lg"><?php echo $service['sessions_count']?>جلسات</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs font-bold">
+                        <span class="text-slate-400">زمن الجلسة المتوقع:</span>
+                        <span class="text-slate-600"><?php echo $service['duration_time']?> دقيقة</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs font-bold">
+                        <span class="text-slate-400">الضمان والمتابعة:</span>
+                        <span class="text-emerald-600">مشمول الفحص مجاناً</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- السعر وزر الحجز -->
+            <div class="bg-slate-50 rounded-2xl p-4 flex items-center justify-between mt-auto">
+                <div>
+                    <span class="block text-[10px] font-bold text-slate-400">تكلفة العلاج الإجمالية</span>
+                    <span class="text-2xl font-black text-slate-900"><?php echo $service['price']?> <span class="text-sm font-bold text-slate-500">شيكل</span></span>
+                </div>
+                <a href="register.php" class="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs px-4 py-3 rounded-xl shadow-md shadow-sky-100 transition-all"> سجل واحجز الأن</a>
+            </div>
+        </div>
+<?php }?>
+    </div>
+</main>
 <!-- ABOUT -->
 <section class="py-28" id="about">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
@@ -205,14 +204,12 @@ $faqs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 </section>
-<!-- FAQ -->
 <section class="py-28 bg-slate-50" id="faq">
     <div class="max-w-4xl mx-auto px-6 lg:px-8">
         <div class="text-center mb-16">
             <span class="text-sky-500 font-black text-lg">الأسئلة الشائعة</span>
             <h2 class="text-[42px] font-900 text-slate-900 leading-[1.3] mt-5">لديك استفسار؟ تجد إجابته هنا</h2>
         </div>
-
         <div class="space-y-6">
             <?php foreach ($faqs as $faq): ?>
             <div class="p-6 bg-white border border-slate-200 rounded-[24px] hover:border-sky-300 transition duration-300 shadow-sm">

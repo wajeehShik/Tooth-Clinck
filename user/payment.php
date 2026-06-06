@@ -1,7 +1,6 @@
-<?php include('include/header.php');
+<?php include('../include/header.php');
 $id = $_GET['id'] ?? null;
 $user_id = $_SESSION['id'] ?? null;
-
 if (!$id || !$user_id) {
     die("خطأ: بيانات غير مكتملة.");
 }
@@ -9,7 +8,7 @@ if (!$id || !$user_id) {
 $stmt = $pdo->prepare("SELECT cs.*, s.name as service_name, s.price  as service_price
                        FROM clinic_slots cs 
                        JOIN services s ON cs.service_id = s.id 
-                       WHERE cs.id = ? AND cs.user_id = ?");
+                       WHERE cs.id = ? AND cs.user_id = ?  and cs.status='1'");
 $stmt->execute([$id, $user_id]);
 $booking = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -23,29 +22,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['img'])) {
     
     // 1. رفع الصورة
     $upload_dir = '../docotor/upload/payments/';
+    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
     $file_name = time() . '_' . basename($_FILES['img']['name']);
     $target_file = $upload_dir . $file_name;
     
     if (move_uploaded_file($_FILES['img']['tmp_name'], $target_file)) {
         
         try {
+
             $sql_payment = "INSERT INTO payments (
             date_id, user_id,doctor_id,price, status,created_at) 
-                            VALUES (?, ?,2,?, '1', NOW())";
+                            VALUES (?, ?,1,?, '3', NOW())";
             $stmt_payment = $pdo->prepare($sql_payment);
    $stmt_payment->execute([$booking_id, $user_id,$booking['service_price']]);
 
-    echo '<script>alert(\'test\')</script>';
-            $sql_update = "UPDATE clinic_slots SET status = '1' WHERE id = ? AND user_id = ?";
+            $sql_update = "UPDATE clinic_slots SET status = '2' WHERE id = ? AND user_id = ?";
             $stmt_update = $pdo->prepare($sql_update);
             $stmt_update->execute([$booking_id, $user_id]);
-            // dd('test');
             $_SESSION['success']='تمت عملية الدفع بنجاح';
+
+$stmt = $pdo->prepare('INSERT INTO notifications (`message`, `link`) VALUES (?, ?)');
+$ms = 'تم دفع    لجلسة   '.$booking['id'].'من قبل ' . $_SESSION['name'];
+$stmt->execute([$ms, 'dates.php']);
             header("Location:dashboard.php");
             exit;
-            
         } catch (Exception $e) {
-            $pdo->rollBack(); // التراجع في حال حدوث خطأ
+            $pdo->rollBack();  
             echo "حدث خطأ: " . $e->getMessage();
         }
     } else {
@@ -70,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['img'])) {
                             <span class="text-2xl">😁</span>
                             <div>
                                 <h4 class="font-bold text-slate-900 text-sm">جلسة تبييض ليزر</h4>
-                                <p class="text-xs text-slate-400">مع د. سليم أحمد</p>
                             </div>
                         </div>
 
@@ -164,4 +165,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['img'])) {
         }
     }
 </script>
-<?php include('include/footer.php')?>
+<?php include('../include/footer.php')?>

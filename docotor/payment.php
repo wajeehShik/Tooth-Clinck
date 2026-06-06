@@ -40,7 +40,7 @@ $payments = $stmt->fetchAll();
                             <td class="p-5 font-bold text-slate-900"><?= htmlspecialchars($pay['patient_name']) ?></td>
                             <td class="p-5 text-emerald-600"><?= htmlspecialchars($pay['service_name']) ?></td>
                             <td class="p-5 font-black text-slate-800"><?= number_format($pay['price'], 2) ?> ر.س</td>
-                            <td class="p-5 text-slate-600 uppercase"><?= htmlspecialchars($pay['payment_method']) ?></td>
+                            <td class="p-5 text-slate-600 uppercase"><?= htmlspecialchars($pay['payment_method']=='card'?'تطبيق':'كاش') ?></td>
                             <td class="p-5">
                                     <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg text-[10px] font-bold">مكتمل</span>
                            

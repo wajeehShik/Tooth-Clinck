@@ -52,6 +52,12 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$name, $email, $phone, $hashedPassword]);
 $newUserId = $pdo->lastInsertId();
+$stmt=$pdo->prepare("insert into  notifications (`message`,`link`) values (?,?)");
+$msg="تم تسجيل مستخدم جديد";
+$link="users.php";
+$stmt->execute([$msg,$link]);
+
+
     $_SESSION['success'] = "تم إنشاء الحساب بنجاح 🎉";
             session_regenerate_id(true);
 
